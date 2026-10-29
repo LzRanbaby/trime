@@ -1,0 +1,78 @@
+# GlassKeys v1 build: debug APK with bundled Rime Ice data and the
+# synthesized Glass Click keypress sound.
+#
+# Large data files are intentionally NOT stored in this repository:
+#   * the Rime Ice file set (66 files, ~49 MB) is fetched at build time
+#     from iDvel/rime-ice at a pinned commit, following the exact list
+#     in tools/glass/rime-files.txt;
+#   * soundeffect/glass/click.wav is generated at build time by
+#     tools/glass/make_click.py (synthesized, not a recorded asset).
+# Both must land in app/src/main/assets/rime/ BEFORE the Gradle build,
+# because the build generates checksums.json over the whole assets tree
+# (DataChecksums plugin) and the app deploys those files on first run.
+
+name: GlassKeys Build
+
+on:
+  push:
+    branches:
+      - glass
+  workflow_dispatch:
+
+env:
+  BUILD_ABI: arm64-v8a
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: "temurin"
+          java-version: 25
+          cache: "gradle"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: "platform-tools cmake;3.31.6"
+
+      - name: Fetch Rime Ice data files
+        run: |
+          set -euo pipefail
+          RIME_ICE_COMMIT=da1fbe602e38f26db846fa10120ee64c2b0324c0
+          git init /tmp/rime-ice
+          git -C /tmp/rime-ice remote add origin https://github.com/iDvel/rime-ice.git
+          git -C /tmp/rime-ice fetch --depth 1 origin "$RIME_ICE_COMMIT"
+          git -C /tmp/rime-ice checkout FETCH_HEAD
+          count=0
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            mkdir -p "app/src/main/assets/rime/$(dirname "$f")"
+            cp "/tmp/rime-ice/$f" "app/src/main/assets/rime/$f"
+            count=$((count + 1))
+          done < tools/glass/rime-files.txt
+          echo "Copied $count Rime Ice files"
+          test "$count" -gt 0
+
+      - name: Generate keypress click sound
+        run: |
+          mkdir -p app/src/main/assets/rime/soundeffect/glass
+          python3 tools/glass/make_click.py
+
+      - name: Build debug APK
+        run: make debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: glasskeys-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

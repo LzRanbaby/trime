@@ -27,7 +27,8 @@ class ThemePrefs(
         string(
             R.string.normal_mode_color,
             NORMAL_MODE_COLOR,
-            "default",
+            // GlassKeys: ship with the liquid glass (light) scheme out of the box
+            "glass_light",
             R.string.normal_mode_color_summary,
         )
 

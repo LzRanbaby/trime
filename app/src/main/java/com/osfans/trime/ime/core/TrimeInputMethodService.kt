@@ -63,6 +63,7 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import splitties.systemservices.clipboardManager
 import splitties.systemservices.inputMethodManager
+import splitties.systemservices.windowManager
 import timber.log.Timber
 
 /** [輸入法][InputMethodService]主程序  */
@@ -568,6 +569,9 @@ open class TrimeInputMethodService : LifecycleInputMethodService() {
         restarting: Boolean,
     ) {
         Timber.d("onStartInputView: restarting=$restarting")
+        // GlassKeys: (re)apply liquid-glass window blur every time the keyboard shows;
+        // it self-disables on devices without cross-window blur support.
+        GlassBlurHelper.applyTo(window.window, windowManager)
         InputFeedbackManager.startInput()
         postRimeJob {
             updateRimeOption(this)

@@ -1,0 +1,6 @@
+# GlassKeys: make Rime Ice (雾凇拼音, full pinyin, simplified) the default
+# and only preloaded schema on first deploy. Users can edit/remove this
+# file in the Rime user directory to restore the stock schema list.
+patch:
+  schema_list:
+    - schema: rime_ice

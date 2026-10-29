@@ -188,11 +188,12 @@ class AppPrefs(
         val hideKeySymbol = switch(R.string.hide_key_symbol, HIDE_KEY_SYMBOL, false)
         val hideKeyHint = switch(R.string.hide_key_hint, HIDE_KEY_HINT, false)
 
-        val soundOnKeyPress = switch(R.string.sound_on_keypress, SOUND_ON_KEYPRESS, false)
+        // GlassKeys: keypress sound is on out of the box (bundled "Glass Click" effect)
+        val soundOnKeyPress = switch(R.string.sound_on_keypress, SOUND_ON_KEYPRESS, true)
         val soundVolume = int(
             R.string.sound_volume,
             KEY_SOUND_VOLUME,
-            10,
+            50,
             0,
             100,
             "%",
@@ -202,12 +203,14 @@ class AppPrefs(
         val useCustomSoundEffect = switch(
             R.string.custom_sound_effect_enabled,
             USE_CUSTOM_SOUND_EFFECT,
-            false,
+            // GlassKeys: use the bundled custom effect by default
+            true,
         ) { soundOnKeyPress.getValue() }
         val customSoundEffect = string(
             R.string.custom_sound_effect_name,
             CUSTOM_SOUND_EFFECT,
-            "",
+            // GlassKeys: must match the `name` in assets/rime/soundeffect/glass.sound.yaml
+            "Glass Click",
         ) { soundOnKeyPress.getValue() && useCustomSoundEffect.getValue() }
 
         val vibrateOnKeyPress = switch(R.string.vibrate_on_key_press, VIBRATE_ON_KEY_PRESS, false)

@@ -1,0 +1,15 @@
+# GlassKeys bundled keypress sound effect.
+# The `name` below must match the default of AppPrefs.customSoundEffect.
+# click.wav is synthesized by us (a short 45 ms Gboard-style click);
+# it is NOT extracted from any proprietary keyboard.
+name: Glass Click
+folder: glass
+sound:
+  - click.wav
+keyset:
+  # One entry covering the standard virtual-key keycode range
+  # (letters/digits are < 60, space/del/enter/shift are < 70).
+  - min: KEYCODE_UNKNOWN
+    max: KEYCODE_BUTTON_MODE
+    inOrder: false
+    sounds: [0]
